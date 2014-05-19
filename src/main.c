@@ -6,16 +6,14 @@ char txbuf[256];
 
 void uart_init() {
   UCA0CTL0 = 0;
-  UCA0CTL1 |= UCSWRST;
-  UCA0CTL1 = UCSSEL_2 + UCSWRST;
-  UCA0MCTL = UCBRF_0 + UCBRS_6;
-  UCA0BR0 = 131;
+  UCA0CTL1 |= UCSWRST; // Put USCI in reset mode
+  UCA0CTL1 = UCSSEL_2 | UCSWRST; // Use SMCLK, still reset
+  UCA0MCTL = UCBRF_0 | UCBRS_6;
+  UCA0BR0 = 131; // 9600 bauds
   UCA0BR1 = 6;
-  UCA0CTL1 &= ~UCSWRST;
-	P1SEL2 |= (BIT1 + BIT2);
+  UCA0CTL1 &= ~UCSWRST; // Normal mode
+	P1SEL2 |= (BIT1 + BIT2); // Set pins for USCI
 	P1SEL |= (BIT1 + BIT2);
-  P1DIR |= BIT0|BIT6;
-  P1OUT &= ~(BIT0|BIT6);
 }
 
 void uart_send(int len) {
@@ -31,8 +29,6 @@ int main() {
   DCOCTL = 0;
   BCSCTL1 = CALBC1_16MHZ;
   DCOCTL = CALDCO_16MHZ;
-  BCSCTL3 = XCAP_2; // LFXT1 10pf caps
-
 
   uart_init();
 
