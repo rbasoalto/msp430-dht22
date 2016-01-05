@@ -45,14 +45,6 @@ dht_start_read() {
   TA1CTL = TASSEL_2 | ID_0 | MC_1;
 
   dht_current_state = DHT_TRIGGERING;
-
-  //
-  // TA1CTL = TACLR;
-  // TA1CTL = TASSEL_2 | ID_0 | MC_2;
-  // TA1CCTL0 = CM_3 | CCIS_0 | CAP | CCIE;
-  // //P2.0 is Capture 0 input for Timer1_A3
-  // P2DIR &= ~BIT0;
-  // P2SEL |= BIT0;
 }
 
 void __attribute__((interrupt (TIMER1_A0_VECTOR)))
@@ -74,7 +66,7 @@ timer1_a0_isr() {
     break;
   case DHT_WAITING_ACK:
     // I don't care about timings here...
-    P2DIR &= ~BIT6; // input
+    P2DIR &= ~BIT0; // input
     TA1CTL = TACLR;
     TA1CTL = TASSEL_2 | ID_0 | MC_2;
     TA1CCTL0 = CM_1 | CCIS_0 | CAP | CCIE; // Capture on rising edge
@@ -113,6 +105,7 @@ timer1_a0_isr() {
     }
     if (dht_data_byte >= 5) {
       // I'm done, bye
+      // TODO: check CRC
       TA1CTL = TACLR;
       dht_current_state = DHT_IDLE;
     } else {
